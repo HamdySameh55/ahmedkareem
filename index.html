@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ahmed Abdou — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="lang-ar" dir="rtl">
+
+<div class="container">
+  <header class="app-header" id="appHeader"></header>
+
+  <!-- Profile -->
+  <div class="profile-card">
+    <div class="profile-photo">
+      <span class="fallback">Ab</span>
+      <img src="photo_2026-08-31_00-43-55.png" alt="Ahmed Abdou" onerror="this.remove()">
+    </div>
+    <div class="profile-info">
+      <div class="name i18n-ar">أحمد عبدو</div>
+      <div class="name i18n-en">Ahmed Abdou</div>
+      <div class="goal-chip"><span class="i18n-ar">ضخامة — هدف ٣٠ يوم</span><span class="i18n-en">Bulk — 30-Day Goal</span></div>
+    </div>
+  </div>
+
+  <!-- 30-day challenge countdown -->
+  <div class="countdown-card card">
+    <div class="countdown-body">
+      <div class="cd-num" id="cdDays">30</div>
+      <div class="cd-lbl"><span class="i18n-ar">يوم باقٍ في تحدي الـ ٣٠ يوم</span><span class="i18n-en">Days left in the 30-day challenge</span></div>
+      <div class="cd-sub"><span class="i18n-ar">هدف: زيادة الوزن وبناء عضل</span><span class="i18n-en">Goal: gain weight &amp; build muscle</span></div>
+    </div>
+  </div>
+
+  <!-- Core stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="icon" data-icon="weight"></div>
+      <div class="val">58 <span class="i18n-ar">كجم</span><span class="i18n-en">kg</span></div>
+      <div class="lbl i18n-ar">الوزن</div><div class="lbl i18n-en">Weight</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon" data-icon="ruler"></div>
+      <div class="val">178 <span class="i18n-ar">سم</span><span class="i18n-en">cm</span></div>
+      <div class="lbl i18n-ar">الطول</div><div class="lbl i18n-en">Height</div>
+    </div>
+   <div class="stat-card">
+      <div class="icon" data-icon="target"></div>
+      <div class="val"><span class="i18n-ar">ضخامة</span><span class="i18n-en">Bulk</span></div>
+      <div class="lbl i18n-ar">الهدف</div><div class="lbl i18n-en">Goal</div>
+    </div>
+  </div>
+
+  <!-- Progress overview -->
+  <div class="card section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">التقدم</span><span class="i18n-en">Progress</span></h3>
+    </div>
+    <div class="progress-grid">
+      <div class="prog-item">
+        <div class="prog-val" id="progTrain">0</div>
+        <div class="prog-lbl"><span class="i18n-ar">أيام تمرين هذا الأسبوع</span><span class="i18n-en">Training days this week</span></div>
+        <div class="bar-track"><div class="bar-fill" id="progTrainBar" style="width:0%"></div></div>
+      </div>
+      <div class="prog-item">
+        <div class="prog-val" id="progTotal">0</div>
+        <div class="prog-lbl"><span class="i18n-ar">إجمالي أيام التمرين المسجّلة</span><span class="i18n-en">Total training days logged</span></div>
+        <div class="bar-track"><div class="bar-fill" id="progTotalBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nutrition snapshot -->
+  <div class="card section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">التغذية</span><span class="i18n-en">Nutrition</span></h3>
+      <a href="diet.html" class="sub" style="color:var(--lime);"><span class="i18n-ar">الأكل</span><span class="i18n-en">Meals</span></a>
+    </div>
+    <p class="nutr-line" style="margin:0; color:var(--muted); font-size:14px;">
+      <span class="i18n-ar">أكل كتير — شوفان ولبن وعسل وموز وبروتين. 🥣 سجّل التزامك بالأكل كل يوم من صفحة السجل.</span>
+      <span class="i18n-en">Eat big — oats, milk, honey, banana, protein. Log your diet commitment each day from the Log page.</span>
+    </p>
+  </div>
+
+  <!-- Daily quote (single card only) -->
+  <div class="quote-card">
+    <div class="eyebrow"><span class="i18n-ar">جملة اليوم</span><span class="i18n-en">Today's Line</span></div>
+    <p id="quoteOfDay"></p>
+  </div>
+
+  <footer class="page-footer">
+    <span class="i18n-ar">خطة أحمد عبدو — هدف الضخامة ٣٠ يوم. بياناتك محفوظة محلياً على هذا المتصفح.</span>
+    <span class="i18n-en">Ahmed Abdou's Plan — 30-day bulk goal. Your data is saved locally on this browser.</span>
+  </footer>
+</div>
+
+<nav class="bottom-nav" id="appNav"></nav>
+
+<script src="app.js"></script>
+<script>
+renderHeader('home');
+renderNav('home');
+
+document.querySelectorAll('.stat-card .icon[data-icon]').forEach(el=>{
+  el.innerHTML = ICONS[el.dataset.icon];
+});
+
+/* ---- 30-day countdown ---- */
+(function(){
+  const start = new Date(PROFILE.challengeStart).getTime();
+  const end = start + PROFILE.challengeDays*24*60*60*1000;
+  const now = Date.now();
+  const el = document.getElementById('cdDays');
+  if(now < start){ el.textContent = PROFILE.challengeDays; }
+  else if(now >= end){ el.textContent = '0'; }
+  else { el.textContent = Math.ceil((end - now)/(24*60*60*1000)); }
+})();
+
+/* ---- Daily quote (single card) ---- */
+(function(){
+  const all = MOTIVATION.serious;
+  const today = new Date();
+  const seed = today.getFullYear()*372 + today.getMonth()*31 + today.getDate();
+  const q = all[seed % all.length];
+  document.getElementById('quoteOfDay').innerHTML =
+    `<span class="i18n-ar">${q.ar}</span><span class="i18n-en">${q.en}</span>`;
+})();
+
+/* ---- Progress from real workout records (ak_workout_records) ---- */
+(function(){
+  const weekTrained = countWorkoutWeek();
+  const totalTrained = countWorkoutChallenge();
+  const weekCap = 7;
+  const totalCap = PROFILE.challengeDays;
+  const weekPct = Math.min(100, Math.round(weekTrained/weekCap*100));
+  const totalPct = Math.min(100, Math.round(totalTrained/totalCap*100));
+  document.getElementById('progTrain').textContent = weekTrained + '/' + weekCap;
+  document.getElementById('progTrainBar').style.width = weekPct + '%';
+  document.getElementById('progTotal').textContent = totalTrained + '/' + totalCap;
+  document.getElementById('progTotalBar').style.width = totalPct + '%';
+})();
+
+renderBeforeGrid();
+wireBeforeGrid();
+</script>
+</body>
+</html>

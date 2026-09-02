@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ahmed Abdou — Daily Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="lang-ar" dir="rtl">
+
+<div class="container">
+  <header class="app-header" id="appHeader"></header>
+
+  <form class="card" id="logForm" action="https://formspree.io/f/xqpkeadb" method="POST">
+    <input type="hidden" name="_subject" value="سجل يومي جديد - أحمد عبدو">
+    <input type="hidden" name="client" value="Ahmed Abdou">
+    <div class="field">
+      <label><span class="i18n-ar">التاريخ</span><span class="i18n-en">Date</span></label>
+      <input type="date" id="fDate" name="date" required>
+    </div>
+
+    <div class="field">
+      <label><span class="i18n-ar">يوم التقسيمة</span><span class="i18n-en">Split Day</span></label>
+      <select id="fDay" name="split_day"></select>
+    </div>
+
+    <div class="field">
+      <label><span class="i18n-ar">هل تمرنت النهارده؟</span><span class="i18n-en">Did you train today?</span></label>
+      <div class="radio-row">
+        <label><input type="radio" name="trained" value="yes" checked><span class="i18n-ar">تمرنت</span><span class="i18n-en">Trained</span></label>
+        <label><input type="radio" name="trained" value="no"><span class="i18n-ar">ماتمرنتش</span><span class="i18n-en">Skipped</span></label>
+      </div>
+      <div class="conditional" id="reasonBox">
+        <input type="text" id="fReason" name="skip_reason">
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="i18n-ar">هل التزمت بالأكل؟</span><span class="i18n-en">Did you stick to the diet?</span></label>
+      <div class="radio-row">
+        <label><input type="radio" name="diet" value="yes" checked><span class="i18n-ar">التزمت</span><span class="i18n-en">On Track</span></label>
+        <label><input type="radio" name="diet" value="no"><span class="i18n-ar">ماكلتش كويس</span><span class="i18n-en">Off Track</span></label>
+      </div>
+      <div class="conditional" id="dietReasonBox">
+        <input type="text" id="fDietReason" name="diet_note">
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="i18n-ar">مكملات النهارده</span><span class="i18n-en">Today's Supplements</span></label>
+      <div class="check-list">
+        <label><input type="checkbox" class="supp" name="supplements" value="creatine"><span class="i18n-ar">كرياتين</span><span class="i18n-en">Creatine</span></label>
+        <label><input type="checkbox" class="supp" name="supplements" value="whey"><span class="i18n-ar">بروتين واي</span><span class="i18n-en">Whey Protein</span></label>
+        <label><input type="checkbox" class="supp" name="supplements" value="multivitamin"><span class="i18n-ar">فيتامينات</span><span class="i18n-en">Multivitamin</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="i18n-ar">ملاحظات إضافية</span><span class="i18n-en">Extra Notes</span></label>
+      <textarea id="fNotes" name="notes"></textarea>
+    </div>
+
+    <button type="submit" class="btn block" id="submitBtn">
+      <span class="i18n-ar">حفظ اليوم</span><span class="i18n-en">Save Day</span>
+    </button>
+    <div class="form-status" id="formStatus"></div>
+  </form>
+
+  <div class="section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">السجل</span><span class="i18n-en">History</span></h3>
+    </div>
+    <div class="history" id="historyList"></div>
+  </div>
+
+  <footer class="page-footer">
+    <span class="i18n-ar">السجل بيتحفظ على المتصفح ده.</span>
+    <span class="i18n-en">The log is saved on this browser.</span>
+  </footer>
+</div>
+
+<nav class="bottom-nav" id="appNav"></nav>
+
+<script src="app.js"></script>
+<script>
+renderHeader('log', {
+  eyebrow: '<span class="i18n-ar">السجل اليومي</span><span class="i18n-en">Daily Log</span>',
+  title: '<span class="i18n-ar">سجّل يومك</span><span class="i18n-en">Log Your Day</span>',
+  desc: '<span class="i18n-ar">سجل كل يوم: تمرنت؟ أكلت كتير؟ التزمت في خطوة الضخامة؟ الملاحظات مش مهمة، المهم الاستمرارية.</span><span class="i18n-en">Log each day: did you train? Did you eat a lot? Are you on track with the bulk? Notes don\'t matter, consistency does.</span>'
+});
+renderNav('log');
+
+const dayLabelsAr = (()=>{ const m={}; DAYS.forEach(d=>m[d.key]=d.titleAr); m['restcardio']='راحة'; return m; })();
+const dayLabelsEn = (()=>{ const m={}; DAYS.forEach(d=>m[d.key]=d.titleEn); m['restcardio']='Rest'; return m; })();
+const suppLabelsAr = {creatine:'كرياتين', whey:'بروتين واي', multivitamin:'فيتامينات'};
+const suppLabelsEn = {creatine:'Creatine', whey:'Whey', multivitamin:'Multivitamin'};
+
+function renderDaySelect(){
+  const sel = document.getElementById('fDay');
+  sel.innerHTML = DAYS.map(d=>`
+    <option value="${d.key}" data-ar="${d.titleAr}" data-en="${d.titleEn}"></option>
+  `).join('');
+  updateDaySelectLabels();
+}
+function updateDaySelectLabels(){
+  const isEn = document.body.classList.contains('lang-en');
+  document.querySelectorAll('#fDay option').forEach(o=>{
+    o.textContent = isEn ? o.dataset.en : o.dataset.ar;
+  });
+}
+function onLangChange(){ updateDaySelectLabels(); }
+
+const dateField = document.getElementById('fDate');
+dateField.value = new Date().toISOString().slice(0,10);
+
+document.querySelectorAll('input[name="trained"]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    document.getElementById('reasonBox').classList.toggle('show', document.querySelector('input[name="trained"]:checked').value === 'no');
+  });
+});
+document.querySelectorAll('input[name="diet"]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    document.getElementById('dietReasonBox').classList.toggle('show', document.querySelector('input[name="diet"]:checked').value === 'no');
+  });
+});
+
+function renderHistory(){
+  const logs = getLogs().slice().reverse();
+  const wrap = document.getElementById('historyList');
+  if(logs.length === 0){
+    wrap.innerHTML = `<div class="history-empty">
+      <span class="i18n-ar">لسه مفيش أيام متسجلة. سجل أول يوم من الفورم فوق.</span>
+      <span class="i18n-en">No days logged yet. Log your first day from the form above.</span>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = logs.map(l=>{
+    const supps = (l.supps||[]).map(s=>`<span class="i18n-ar">${suppLabelsAr[s]}</span><span class="i18n-en">${suppLabelsEn[s]}</span>`).join(', ');
+    return `
+    <div class="log-entry" data-id="${l.id}">
+      <button class="del-btn" data-id="${l.id}"><span class="i18n-ar">حذف</span><span class="i18n-en">Delete</span></button>
+      <div class="row1"><span class="date">${l.date}</span></div>
+      <div class="meta">
+        <span class="badge ${l.trained==='yes' ? 'ok':'no'}">
+          <span class="i18n-ar">${l.trained==='yes' ? 'اتمرن' : 'ماتمرنش'}</span>
+          <span class="i18n-en">${l.trained==='yes' ? 'Trained' : 'Skipped'}</span>
+        </span>
+        <span class="badge ${l.diet==='yes' ? 'ok':'no'}">
+          <span class="i18n-ar">${l.diet==='yes' ? 'التزم بالأكل' : 'ماكلش كويس'}</span>
+          <span class="i18n-en">${l.diet==='yes' ? 'On Diet' : 'Off Diet'}</span>
+        </span>
+        <span class="badge ok"><span class="i18n-ar">${dayLabelsAr[l.day]}</span><span class="i18n-en">${dayLabelsEn[l.day]}</span></span>
+      </div>
+      ${l.reason ? `<div class="note"><span class="i18n-ar">سبب عدم التمرين: </span><span class="i18n-en">Reason skipped: </span>${l.reason}</div>` : ''}
+      ${l.dietReason ? `<div class="note"><span class="i18n-ar">ملاحظة الأكل: </span><span class="i18n-en">Diet note: </span>${l.dietReason}</div>` : ''}
+      ${supps ? `<div class="note"><span class="i18n-ar">مكملات: </span><span class="i18n-en">Supplements: </span>${supps}</div>` : ''}
+      ${l.notes ? `<div class="note"><span class="i18n-ar">ملاحظات: </span><span class="i18n-en">Notes: </span>${l.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('logForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const form = e.target;
+  const submitBtn = document.getElementById('submitBtn');
+  const statusBox = document.getElementById('formStatus');
+
+  const entry = {
+    id: Date.now(),
+    date: dateField.value,
+    day: document.getElementById('fDay').value,
+    trained: document.querySelector('input[name="trained"]:checked').value,
+    reason: document.getElementById('fReason').value.trim(),
+    diet: document.querySelector('input[name="diet"]:checked').value,
+    dietReason: document.getElementById('fDietReason').value.trim(),
+    supps: [...document.querySelectorAll('.supp:checked')].map(c=>c.value),
+    notes: document.getElementById('fNotes').value.trim(),
+  };
+
+  function finishLocally(message, cls){
+    const logs = getLogs();
+    logs.push(entry);
+    saveLogs(logs);
+    renderHistory();
+    form.reset();
+    dateField.value = new Date().toISOString().slice(0,10);
+    document.getElementById('reasonBox').classList.remove('show');
+    document.getElementById('dietReasonBox').classList.remove('show');
+    statusBox.className = 'form-status show ' + cls;
+    statusBox.innerHTML = message;
+  }
+
+  submitBtn.disabled = true;
+  const formData = new FormData(form);
+  fetch(form.action, {
+    method: form.method,
+    body: formData,
+    headers: { 'Accept': 'application/json' }
+  }).then(res => {
+    submitBtn.disabled = false;
+    if(res.ok){
+      finishLocally(
+        `<span class="i18n-ar">تم حفظ اليوم وإرساله للمدرب.</span><span class="i18n-en">Day saved and sent to the coach.</span>`,
+        'ok'
+      );
+    } else {
+      finishLocally(
+        `<span class="i18n-ar">اتحفظ اليوم على المتصفح، بس الإرسال للمدرب فشل. تأكد من الإنترنت وحاول تاني لو حبيت.</span><span class="i18n-en">Saved on this browser, but sending to the coach failed. Check your connection and try again if you'd like.</span>`,
+        'err'
+      );
+    }
+  }).catch(() => {
+    submitBtn.disabled = false;
+    finishLocally(
+      `<span class="i18n-ar">اتحفظ اليوم على المتصفح، بس الإرسال للمدرب فشل. تأكد من الإنترنت وحاول تاني لو حبيت.</span><span class="i18n-en">Saved on this browser, but sending to the coach failed. Check your connection and try again if you'd like.</span>`,
+      'err'
+    );
+  });
+});
+
+document.getElementById('historyList').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.del-btn');
+  if(!btn) return;
+  const id = Number(btn.dataset.id);
+  const logs = getLogs().filter(l=>l.id !== id);
+  saveLogs(logs);
+  renderHistory();
+});
+
+renderDaySelect();
+renderHistory();
+</script>
+</body>
+</html>

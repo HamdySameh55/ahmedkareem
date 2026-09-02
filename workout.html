@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ahmed Abdou — Workout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="lang-ar" dir="rtl">
+
+<div class="container">
+  <header class="app-header" id="appHeader"></header>
+
+  <div class="section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">النهارده يوم إيه؟</span><span class="i18n-en">Which day is today?</span></h3>
+    </div>
+    <div class="day-picker" id="dayPicker"></div>
+    <div class="plan-card" id="planCard" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">تسجيل التمرين</span><span class="i18n-en">Log Workout</span></h3>
+    </div>
+    <p class="record-hint"><span class="i18n-ar">اضغط الزر بعد ما تخلص التمرين بتاع النهارده — هيسجّل لك يوم تمرين.</span><span class="i18n-en">Tap the button after finishing today&rsquo;s workout to record a training day.</span></p>
+    <button type="button" class="btn block" id="logWorkoutBtn" style="margin-top:10px;"></button>
+  </div>
+
+  <div class="section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">تمارين اليوم</span><span class="i18n-en">Today's Exercises</span></h3>
+    </div>
+    <div class="ex-grid" id="exGrid"></div>
+  </div>
+
+  <div class="section-card">
+    <div class="head">
+      <h3><span class="i18n-ar">تقسيمة الأسبوع</span><span class="i18n-en">Weekly Split</span></h3>
+    </div>
+    <div class="day-list" id="dayList"></div>
+  </div>
+
+  <div class="card" style="color:var(--muted); font-size:13px;">
+    <span class="i18n-ar">خطة ضخامة ٣٠ يوم — كل تمرين له مجموعاته وعدداته، ورسمة بتبيّن الحركة. أكل كتير مع كل يوم، والنوم أهم من الألم.</span>
+    <span class="i18n-en">30-day bulk plan — every exercise has its sets &amp; reps and a visual showing the movement. Eat a lot with every day, and sleep matters more than soreness.</span>
+  </div>
+
+  <footer class="page-footer">
+    <span class="i18n-ar">٥ أيام تدريب + يوم راحة. اضغط رقم اليوم لتحدد مكانك في التقسيمة.</span>
+    <span class="i18n-en">5 training days + a rest day. Tap a number to set where you are in the split.</span>
+  </footer>
+</div>
+
+<nav class="bottom-nav" id="appNav"></nav>
+
+<script src="app.js"></script>
+<script>
+renderHeader('workout', {
+  eyebrow: '<span class="i18n-ar">التدريب</span><span class="i18n-en">Workout</span>',
+  title: '<span class="i18n-ar">تقسيمة الأسبوع</span><span class="i18n-en">The Weekly Split</span>',
+  desc: '<span class="i18n-ar">خطة ضخامة ٣٠ يوم — ٥ أيام تدريب + راحة.</span><span class="i18n-en">30-day bulk plan — 5 training days + rest.</span>'
+});
+renderNav('workout');
+
+function renderPlanCard(){
+  const card = document.getElementById('planCard');
+  const day = getDayInfo(getCurrentDayKey());
+  card.innerHTML = `
+    <div class="content">
+      <div class="tag"><span class="i18n-ar">${day.ar}</span><span class="i18n-en">${day.en}</span></div>
+      <h4><span class="i18n-ar">${day.titleAr}</span><span class="i18n-en">${day.titleEn}</span></h4>
+      <div class="meta"><span class="i18n-ar">${day.ex.length} تمارين</span><span class="i18n-en">${day.ex.length} exercises</span></div>
+    </div>`;
+}
+
+function renderExGrid(){
+  const day = getDayInfo(getCurrentDayKey());
+  const grid = document.getElementById('exGrid');
+  grid.innerHTML = day.ex.map(ex=>{
+    const img = EX_IMAGE[ex.id];
+    return `
+      <div class="ex-card">
+        <div class="ex-media">${img ? `<img loading="lazy" src="${EX_IMAGE[ex.id]}" alt="${ex.en}">` : ''}</div>
+        <div class="ex-body">
+          <h4 class="ex-name"><span class="i18n-ar">${ex.ar}</span><span class="i18n-en">${ex.en}</span></h4>
+          <div class="ex-sets"><strong>${ex.sets.replace('×',' × ')}</strong></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderDayList(){
+  const activeKey = getCurrentDayKey();
+  const list = document.getElementById('dayList');
+  list.innerHTML = DAYS.map((d,i)=>`
+    <div class="day-card ${d.key === activeKey ? 'today' : ''}" data-key="${d.key}">
+      <div class="num">${i+1}</div>
+      <div class="info">
+        <h4><span class="i18n-ar">${d.titleAr}</span><span class="i18n-en">${d.titleEn}</span></h4>
+        <div class="ex"><span class="i18n-ar">${d.ex.length} تمارين</span><span class="i18n-en">${d.ex.length} exercises</span></div>
+      </div>
+    </div>
+  `).join('') + `
+    <div class="rest-card ${activeKey === 'restcardio' ? 'today' : ''}" style="${activeKey === 'restcardio' ? 'border-style:solid;border-color:var(--lime);color:var(--text);' : ''}">
+      <span class="i18n-ar">راحة / مشي خفيف</span>
+      <span class="i18n-en">Rest / Light walk</span>
+    </div>
+  `;
+  list.querySelectorAll('.day-card[data-key]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      setCurrentDayKey(card.dataset.key);
+      refreshAll();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+}
+
+function refreshAll(){
+  renderDayPicker('dayPicker', refreshAll);
+  renderPlanCard();
+  renderExGrid();
+  renderDayList();
+  renderLogBtn();
+}
+
+/* ---- Workout logging ---- */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+function currentDayNumber(){
+  const key = getCurrentDayKey();
+  const idx = DAYS.findIndex(d=>d.key === key);
+  if(idx >= 0) return idx + 1;
+  return REST_DAY.key === key ? 6 : 1;
+}
+function renderLogBtn(){
+  const btn = document.getElementById('logWorkoutBtn');
+  if(!btn) return;
+  const recorded = isWorkoutRecorded(todayStr());
+  if(recorded){
+    btn.innerHTML = '<span class="i18n-ar">✓ تم تسجيل التمرين</span><span class="i18n-en">✓ Workout logged</span>';
+    btn.disabled = true;
+    btn.classList.add('logged');
+  } else {
+    btn.innerHTML = '<span class="i18n-ar">✓ تسجيل التمرين</span><span class="i18n-en">✓ Log Workout</span>';
+    btn.disabled = false;
+    btn.classList.remove('logged');
+  }
+}
+document.getElementById('logWorkoutBtn').addEventListener('click', ()=>{
+  logWorkout(todayStr(), currentDayNumber());
+  renderLogBtn();
+});
+renderDayPicker('dayPicker', refreshAll);
+refreshAll();
+</script>
+</body>
+</html>

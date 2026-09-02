@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ahmed Abdou — Nutrition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="lang-ar" dir="rtl">
+
+<div class="container">
+  <header class="app-header" id="appHeader"></header>
+
+  <div class="diet-intro">
+    <p>
+      <span class="i18n-ar">عاوز تاكل أي حاجة؟ تمام. أكل الحر ده كله للضخامة — الزق كل اللي قدامك في الأيام الثلاثين دول. اضغط "اختار لي" وهيتم اختيار عشوائي من كل وجبة، أو اختار بنفسك.</span>
+      <span class="i18n-en">Want to eat everything? Great. This is all bulk-mode eating — shovel in whatever is in front of you over these 30 days. Hit "Pick For Me" for a random choice from each meal, or choose yourself.</span>
+    </p>
+    <button class="btn block" id="pickForMeBtn">
+      <span class="i18n-ar">اختار لي</span><span class="i18n-en">Pick For Me</span>
+    </button>
+  </div>
+
+  <div id="mealBlocks"></div>
+
+  <footer class="page-footer">
+    <span class="i18n-ar">كل وجبة لها سناكس مزدوجة قبل وبعد التدريب. كل اللي تاكله يزيدك — خلي الشوفان واللبن والعسل والموز في أي حاجة.</span>
+    <span class="i18n-en">Every main meal has snack options before and after training. Everything you eat builds you — keep oats, milk, honey and banana in the mix.</span>
+  </footer>
+</div>
+
+<nav class="bottom-nav" id="appNav"></nav>
+
+<script src="app.js"></script>
+<script>
+renderHeader('diet', {
+  eyebrow: '<span class="i18n-ar">التغذية</span><span class="i18n-en">Nutrition</span>',
+  title: '<span class="i18n-ar">أكل كتير، مش أكل قليل</span><span class="i18n-en">Eat Big, Not Small</span>',
+  desc: '<span class="i18n-ar">٥ وجبات أو أكتر في اليوم: شوفان ولبن عسل وموز وتمر وبروتين. أنت في وضع الضخامة.</span><span class="i18n-en">5+ meals a day: oats, milk, honey, banana, dates and protein. You are in bulk mode.</span>'
+});
+renderNav('diet');
+
+const mealBlocks = document.getElementById('mealBlocks');
+MEALS.forEach(meal=>{
+  const block = document.createElement('div');
+  block.className = 'meal-block';
+  block.dataset.meal = meal.key;
+  block.innerHTML = `
+    <h3>
+      <span class="i18n-ar">${meal.ar}</span><span class="i18n-en">${meal.en}</span>
+      <span class="count i18n-ar">اختر واحد أو أكتر</span><span class="count i18n-en">Pick one or more</span>
+    </h3>
+    <div class="option-list">
+      ${meal.options.map((o,i)=>`
+        <div class="option-card" data-index="${i}">
+          <div class="txt">
+            <h4><span class="i18n-ar">${o.ar}</span><span class="i18n-en">${o.en}</span></h4>
+            <p><span class="i18n-ar">${o.dAr}</span><span class="i18n-en">${o.dEn}</span></p>
+          </div>
+          <div class="dot"></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  mealBlocks.appendChild(block);
+});
+
+mealBlocks.addEventListener('click', (e)=>{
+  const card = e.target.closest('.option-card');
+  if(!card) return;
+  card.classList.toggle('picked');
+});
+
+document.getElementById('pickForMeBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('.meal-block').forEach(block=>{
+    const cards = [...block.querySelectorAll('.option-card')];
+    cards.forEach(c=>c.classList.remove('picked'));
+    const chosen = cards[Math.floor(Math.random()*cards.length)];
+    chosen.classList.add('picked');
+    chosen.scrollIntoView({block:'nearest', behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+Copy Ahmed's 3 before photos here as:
+- before-1.jpg
+- before-2.jpg
+- before-3.jpg
+
+index.html references them directly. There is no upload UI — these are static developer-controlled assets.
