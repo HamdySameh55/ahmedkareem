@@ -50,8 +50,8 @@
   </div>
 
   <footer class="page-footer">
-    <span class="i18n-ar">٥ أيام تدريب + يوم راحة. اضغط رقم اليوم لتحدد مكانك في التقسيمة.</span>
-    <span class="i18n-en">5 training days + a rest day. Tap a number to set where you are in the split.</span>
+    <span class="i18n-ar">٦ أيام تدريب + يوم راحة. اضغط رقم اليوم لتحدد مكانك في التقسيمة.</span>
+    <span class="i18n-en">6 training days + a rest day. Tap a number to set where you are in the split.</span>
   </footer>
 </div>
 
@@ -62,7 +62,7 @@
 renderHeader('workout', {
   eyebrow: '<span class="i18n-ar">التدريب</span><span class="i18n-en">Workout</span>',
   title: '<span class="i18n-ar">تقسيمة الأسبوع</span><span class="i18n-en">The Weekly Split</span>',
-  desc: '<span class="i18n-ar">خطة ضخامة ٣٠ يوم — ٥ أيام تدريب + راحة.</span><span class="i18n-en">30-day bulk plan — 5 training days + rest.</span>'
+  desc: '<span class="i18n-ar">خطة ضخامة ٣٠ يوم — ٦ أيام تدريب + راحة.</span><span class="i18n-en">30-day bulk plan — 6 training days + rest.</span>'
 });
 renderNav('workout');
 
@@ -138,7 +138,7 @@ function currentDayNumber(){
   const key = getCurrentDayKey();
   const idx = DAYS.findIndex(d=>d.key === key);
   if(idx >= 0) return idx + 1;
-  return REST_DAY.key === key ? 6 : 1;
+  return REST_DAY.key === key ? 7 : 1;
 }
 function renderLogBtn(){
   const btn = document.getElementById('logWorkoutBtn');
